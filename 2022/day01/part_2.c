@@ -3,6 +3,8 @@
 #include <strings.h>
 
 #define MAX_DIGITS 10
+#define MAX_REINDEERS 1000
+#define TOP_REINDEERS 3
 
 int compare_ints(const void *x, const void *y)
 {
@@ -11,17 +13,17 @@ int compare_ints(const void *x, const void *y)
   return (a>b)-(a<b);
 }
 
-int sum(int a[3])
+int sum(int *a, int count)
 {
   int res = 0;
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < count; i++)
     res += a[i];
   return res;
 }
 
 int main()
 {
-  int top[3];
+  int reindeers[MAX_REINDEERS];
   int pos, cur;
   void *res;
 
@@ -30,23 +32,12 @@ int main()
 
   FILE *fp = fopen("input.txt", "rt");
 
-  // init to zeros
-  memset(top, 0, 3 * sizeof(int));
-
   //% read from file until res == NULL (EOF)
   for (cur = 0, pos = 0; res = fgets(v, MAX_DIGITS, fp), res != NULL; /* no action here */)
   {
     if (*v == '\n')
     {
-      if (pos < 3)
-        top[pos] = cur;
-      else if (*top < cur)
-      {
-        if (3 == pos)
-          qsort(top, 3, sizeof(int), compare_ints);
-        *top = cur;
-        qsort(top, 3, sizeof(int), compare_ints);
-      }
+      reindeers[pos] = cur;
       cur = 0;
       pos++;
     }
@@ -55,7 +46,12 @@ int main()
   }
   fclose(fp);
 
-  printf("calories being carried by top 3: %d\n", sum(top));
+  qsort(reindeers, pos, sizeof(int), compare_ints);
+
+  //!                                           reindeers+pos-3 == &(reindeers[pos-3])
+  //!                                                           |
+  //!                                                           v
+  printf("calories being carried by reindeers 3: %d\n", sum(reindeers+pos-3, 3));
 
   return 0;
 }
